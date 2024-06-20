@@ -10,12 +10,13 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
+from cachier import cachier
 
 load_dotenv()
 
 app = FastAPI()
 
-# auth with a bearer api key, whoose hash is stored in the environment variable API_KEY_HASH
+# auth with a bearer api key, whose hash is stored in the environment variable API_KEY_HASH
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 API_KEY_HASH = os.getenv("API_KEY_HASH")
 assert API_KEY_HASH, "API_KEY_HASH environment variable must be set"
@@ -42,6 +43,7 @@ class Classification(BaseModel):
     scores: list[float] = [0.0] * len(DEFAULT_LABELS)
 
 
+@cachier(cache_dir="./cache")
 def classify_sync(message: str, labels: list[str]) -> dict:
     result = classifier(message, candidate_labels=labels)
     return result
