@@ -6,7 +6,9 @@ RUN apt-get update && apt-get install -y curl build-essential
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ADD requirements.txt /app/requirements.txt
-RUN pip install -r requirements.txt
+RUN export TORCH_VERSION=$(grep torch== requirements.txt | cut -d'=' -f3) && \
+    pip install torch==$TORCH_VERSION --index-url https://download.pytorch.org/whl/cpu --no-cache-dir && \
+    pip install -r requirements.txt --no-cache-dir
 
 # ADDING FILES
 ADD app.py /app/app.py
