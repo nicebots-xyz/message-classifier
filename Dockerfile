@@ -19,15 +19,14 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 COPY requirements.txt .
-
-COPY app.py /app/app.py
-COPY ./src /app/src
-
-HEALTHCHECK CMD curl --fail http://localhost:8000/v1/health || exit 1
-# We run the application
-
 RUN pip install -r requirements.txt
 
+COPY app.py /app/app.py
+COPY ./src /app/
+RUN mkdir /app/cache
 RUN adduser -u 9263 --disabled-password --gecos "" appuser && chown -R appuser /app
+
 USER appuser
+HEALTHCHECK CMD curl --fail http://localhost:8000/v1/health || exit 1
+
 CMD ["fastapi", "run"]
