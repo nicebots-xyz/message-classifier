@@ -19,7 +19,11 @@ app = FastAPI()
 # auth with a bearer api key, whose hash is stored in the environment variable API_KEY_HASH
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 API_KEY_HASH = os.getenv("API_KEY_HASH")
-assert API_KEY_HASH, "API_KEY_HASH environment variable must be set"
+if not API_KEY_HASH and os.path.exists("/run/secrets/api_key_hash"):
+    with open("/run/secrets/api_key_hash", "r") as f:
+        API_KEY_HASH = f.read().strip()
+
+assert API_KEY_HASH, "API_KEY_HASH must be set"
 
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
