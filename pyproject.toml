@@ -1,0 +1,32 @@
+[project]
+name = "message-classifier"
+version = "0.1.0"
+description = "Message classifier using transformers and fastapi"
+authors = [
+    {name = "Paillat", email = "me@paillat.dev"},
+]
+dependencies = [
+    "torch>=2.3.1",
+    "numpy<2",
+    "transformers>=4.41.2",
+    "fastapi>=0.111.0",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+[tool.pdm.scripts]
+dev = "fastapi dev"
+lint = "black ."
+export = "pdm export -o requirements.txt --without-hashes --prod"
+tests = "pytest tests"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=24.4.2",
+    "pytest>=8.2.2",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.pdm]
+distribution = false
