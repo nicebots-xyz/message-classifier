@@ -14,7 +14,7 @@ from cachier import cachier
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 # auth with a bearer api key, whose hash is stored in the environment variable API_KEY_HASH
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
