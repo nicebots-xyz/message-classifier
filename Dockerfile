@@ -16,7 +16,7 @@ ADD ./src /app/
 RUN mkdir /app/cache
 
 # ADDING USER
-RUN adduser -u 9263 --disabled-password --gecos "" appuser && chown -R appuser /app
+RUN adduser -u 9263 --disabled-password --gecos "" appuser && chown -R appuser /app && chown -R appuser /app/cache
 USER appuser
 
 HEALTHCHECK CMD curl --fail http://localhost:8000/v1/health || exit 1

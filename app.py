@@ -3,11 +3,14 @@ import hashlib
 import secrets
 import logging
 import os
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 from transformers import pipeline
 from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.requests import Request
 from fastapi.security import OAuth2PasswordBearer
-from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from cachier import cachier
 
@@ -18,6 +21,11 @@ load_dotenv()
 
 # Create FastAPI instance
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+
+# Setup rate limiter
+limiter = Limiter(key_func=lambda: "global", default_limits=["1000 per day"])
+app.state.limiter = limiter  # noqa
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # noqa
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -93,8 +101,12 @@ classification_lock = asyncio.Lock()
 
 # Route to classify message
 @app.get("/v1/classify")
+@limiter.limit("6/second")
 async def classify(
-    message: str, labels: list[str] = None, token: str = Depends(authenticate_user)
+    request: Request,
+    message: str,
+    labels: list[str] = None,
+    token: str = Depends(authenticate_user),
 ) -> Classification:
     labels = labels or DEFAULT_LABELS
     async with classification_lock:  # Ensure only one classification at a time
